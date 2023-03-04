@@ -10,7 +10,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="panda_gym",
-    description="Set of robotic environments based on PyBullet physics engine and gymnasium.",
+    description="Set of robotic environments based on PyBullet physics engine and gym.",
     author="Quentin GALLOUÉDEC",
     author_email="gallouedec.quentin@gmail.com",
     long_description=long_description,
@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     package_data={"panda_gym": ["version.txt"]},
     version=__version__,
-    install_requires=["gymnasium~=0.26", "pybullet", "numpy", "scipy"],
+    install_requires=["gym", "pybullet", "numpy", "scipy"],
     extras_require={
         "develop": ["pytest-cov", "black", "isort", "pytype", "sphinx", "sphinx-rtd-theme"],
     },

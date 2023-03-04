@@ -1,6 +1,6 @@
 # panda-gym
 
-Set of robotic environments based on PyBullet physics engine and gymnasium.
+Set of robotic environments based on PyBullet physics engine and gym.
 
 [![PyPI version](https://img.shields.io/pypi/v/panda-gym.svg?logo=pypi&logoColor=FFE873)](https://pypi.org/project/panda-gym/)
 [![Downloads](https://pepy.tech/badge/panda-gym)](https://pepy.tech/project/panda-gym)
@@ -32,7 +32,7 @@ pip install -e panda-gym
 ## Usage
 
 ```python
-import gymnasium as gym
+import gym
 import panda_gym
 
 env = gym.make('PandaReach-v3', render_mode="human")

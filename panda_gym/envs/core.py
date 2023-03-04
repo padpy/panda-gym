@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple
 
-import gymnasium as gym
+import gym
 import numpy as np
-from gymnasium import spaces
-from gymnasium.utils import seeding
+from gym import spaces
+from gym.utils import seeding
 
 from panda_gym.pybullet import PyBullet
 
@@ -267,7 +267,6 @@ class RobotTaskEnv(gym.Env):
     def reset(
         self, seed: Optional[int] = None, options: Optional[dict] = None
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, Any]]:
-        super().reset(seed=seed, options=options)
         self.task.np_random, seed = seeding.np_random(seed)
         with self.sim.no_rendering():
             self.robot.reset()
@@ -310,15 +309,14 @@ class RobotTaskEnv(gym.Env):
         observation = self._get_obs()
         # An episode is terminated iff the agent has reached the target
         terminated = bool(self.task.is_success(observation["achieved_goal"], self.task.get_goal()))
-        truncated = False
         info = {"is_success": terminated}
         reward = float(self.task.compute_reward(observation["achieved_goal"], self.task.get_goal(), info))
-        return observation, reward, terminated, truncated, info
+        return observation, reward, terminated, info
 
     def close(self) -> None:
         self.sim.close()
 
-    def render(self) -> Optional[np.ndarray]:
+    def render(self, mode=None, **kwargs) -> Optional[np.ndarray]:
         """Render.
 
         If render mode is "rgb_array", return an RGB array of the scene. Else, do nothing and return None.

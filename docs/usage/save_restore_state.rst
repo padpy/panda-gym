@@ -7,7 +7,7 @@ It is possible to save a state of the entire simulation environment. This is use
 
 .. code-block:: python
 
-    import gymnasium as gym
+    import gym
     import numpy as np
 
     import panda_gym
