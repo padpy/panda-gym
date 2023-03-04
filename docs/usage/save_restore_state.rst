@@ -33,7 +33,7 @@ It is possible to save a state of the entire simulation environment. This is use
         env.remove_state(state_id)  # discard the state, as it is no longer needed
 
         # Step with the best action
-        observation, reward, terminated, truncated, info = env.step(best_action)
+        observation, reward, terminated, info = env.step(best_action)
 
         if terminated:
             observation, info = env.reset()

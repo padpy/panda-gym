@@ -17,9 +17,9 @@ It is possible to manually control the robot, giving it deterministic actions, d
         current_position = observation["observation"][0:3]
         desired_position = observation["desired_goal"][0:3]
         action = 5.0 * (desired_position - current_position)
-        observation, reward, terminated, truncated, info = env.step(action)
+        observation, reward, terminated, info = env.step(action)
 
-        if terminated or truncated:
+        if terminated:
             observation, info = env.reset()
 
     env.close()

@@ -12,10 +12,10 @@ images.append(env.render())
 
 for _ in range(1000):
     action = env.action_space.sample()
-    observation, reward, terminated, truncated, info = env.step(action)
+    observation, reward, terminated, info = env.step(action)
     images.append(env.render())
 
-    if terminated or truncated:
+    if terminated:
         observation, info = env.reset()
         images.append(env.render())
 
