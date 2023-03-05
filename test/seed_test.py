@@ -23,9 +23,15 @@ def test_seed_reach():
                 observation, _ = env.reset()
         final_observations.append(observation)
 
-    assert np.allclose(final_observations[0]["observation"], final_observations[1]["observation"])
-    assert np.allclose(final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"])
-    assert np.allclose(final_observations[0]["desired_goal"], final_observations[1]["desired_goal"])
+    assert np.allclose(
+        final_observations[0]["observation"], final_observations[1]["observation"]
+    )
+    assert np.allclose(
+        final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"]
+    )
+    assert np.allclose(
+        final_observations[0]["desired_goal"], final_observations[1]["desired_goal"]
+    )
 
 
 def test_seed_push():
@@ -47,9 +53,15 @@ def test_seed_push():
                 observation, _ = env.reset()
         final_observations.append(observation)
 
-    assert np.allclose(final_observations[0]["observation"], final_observations[1]["observation"])
-    assert np.allclose(final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"])
-    assert np.allclose(final_observations[0]["desired_goal"], final_observations[1]["desired_goal"])
+    assert np.allclose(
+        final_observations[0]["observation"], final_observations[1]["observation"]
+    )
+    assert np.allclose(
+        final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"]
+    )
+    assert np.allclose(
+        final_observations[0]["desired_goal"], final_observations[1]["desired_goal"]
+    )
 
 
 def test_seed_slide():
@@ -70,9 +82,15 @@ def test_seed_slide():
             if terminated:
                 observation, _ = env.reset()
         final_observations.append(observation)
-    assert np.allclose(final_observations[0]["observation"], final_observations[1]["observation"])
-    assert np.allclose(final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"])
-    assert np.allclose(final_observations[0]["desired_goal"], final_observations[1]["desired_goal"])
+    assert np.allclose(
+        final_observations[0]["observation"], final_observations[1]["observation"]
+    )
+    assert np.allclose(
+        final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"]
+    )
+    assert np.allclose(
+        final_observations[0]["desired_goal"], final_observations[1]["desired_goal"]
+    )
 
 
 def test_seed_pick_and_place():
@@ -94,9 +112,15 @@ def test_seed_pick_and_place():
                 observation, _ = env.reset()
         final_observations.append(observation)
 
-    assert np.allclose(final_observations[0]["observation"], final_observations[1]["observation"])
-    assert np.allclose(final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"])
-    assert np.allclose(final_observations[0]["desired_goal"], final_observations[1]["desired_goal"])
+    assert np.allclose(
+        final_observations[0]["observation"], final_observations[1]["observation"]
+    )
+    assert np.allclose(
+        final_observations[0]["achieved_goal"], final_observations[1]["achieved_goal"]
+    )
+    assert np.allclose(
+        final_observations[0]["desired_goal"], final_observations[1]["desired_goal"]
+    )
 
 
 # def test_seed_stack():

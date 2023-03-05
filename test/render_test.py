@@ -18,7 +18,9 @@ def test_render():
 
 
 def test_new_render_shape():
-    env = gym.make("PandaReach-v3", render_mode="rgb_array", render_height=48, render_width=84)
+    env = gym.make(
+        "PandaReach-v3", render_mode="rgb_array", render_height=48, render_width=84
+    )
 
     env.reset()
     for _ in range(100):

@@ -139,9 +139,13 @@ class PyBulletRobot(ABC):
         Args:
             angles (list): Joint angles.
         """
-        self.sim.set_joint_angles(self.body_name, joints=self.joint_indices, angles=angles)
+        self.sim.set_joint_angles(
+            self.body_name, joints=self.joint_indices, angles=angles
+        )
 
-    def inverse_kinematics(self, link: int, position: np.ndarray, orientation: np.ndarray) -> np.ndarray:
+    def inverse_kinematics(
+        self, link: int, position: np.ndarray, orientation: np.ndarray
+    ) -> np.ndarray:
         """Compute the inverse kinematics and return the new joint values.
 
         Args:
@@ -152,7 +156,9 @@ class PyBulletRobot(ABC):
         Returns:
             List of joint values.
         """
-        inverse_kinematics = self.sim.inverse_kinematics(self.body_name, link=link, position=position, orientation=orientation)
+        inverse_kinematics = self.sim.inverse_kinematics(
+            self.body_name, link=link, position=position, orientation=orientation
+        )
         return inverse_kinematics
 
 
@@ -186,11 +192,21 @@ class Task(ABC):
             return self.goal.copy()
 
     @abstractmethod
-    def is_success(self, achieved_goal: np.ndarray, desired_goal: np.ndarray, info: Dict[str, Any] = {}) -> np.ndarray:
+    def is_success(
+        self,
+        achieved_goal: np.ndarray,
+        desired_goal: np.ndarray,
+        info: Dict[str, Any] = {},
+    ) -> np.ndarray:
         """Returns whether the achieved goal match the desired goal."""
 
     @abstractmethod
-    def compute_reward(self, achieved_goal: np.ndarray, desired_goal: np.ndarray, info: Dict[str, Any] = {}) -> np.ndarray:
+    def compute_reward(
+        self,
+        achieved_goal: np.ndarray,
+        desired_goal: np.ndarray,
+        info: Dict[str, Any] = {},
+    ) -> np.ndarray:
         """Compute reward associated to the achieved and the desired goal."""
 
 
@@ -224,7 +240,9 @@ class RobotTaskEnv(gym.Env):
         render_pitch: float = -30,
         render_roll: float = 0,
     ) -> None:
-        assert robot.sim == task.sim, "The robot and the task must belong to the same simulation."
+        assert (
+            robot.sim == task.sim
+        ), "The robot and the task must belong to the same simulation."
         self.sim = robot.sim
         self.render_mode = self.sim.render_mode
         self.metadata["render_fps"] = 1 / self.sim.dt
@@ -236,9 +254,15 @@ class RobotTaskEnv(gym.Env):
         desired_goal_shape = observation["achieved_goal"].shape
         self.observation_space = spaces.Dict(
             dict(
-                observation=spaces.Box(-10.0, 10.0, shape=observation_shape, dtype=np.float32),
-                desired_goal=spaces.Box(-10.0, 10.0, shape=achieved_goal_shape, dtype=np.float32),
-                achieved_goal=spaces.Box(-10.0, 10.0, shape=desired_goal_shape, dtype=np.float32),
+                observation=spaces.Box(
+                    -10.0, 10.0, shape=observation_shape, dtype=np.float32
+                ),
+                desired_goal=spaces.Box(
+                    -10.0, 10.0, shape=achieved_goal_shape, dtype=np.float32
+                ),
+                achieved_goal=spaces.Box(
+                    -10.0, 10.0, shape=desired_goal_shape, dtype=np.float32
+                ),
             )
         )
         self.action_space = self.robot.action_space
@@ -255,7 +279,9 @@ class RobotTaskEnv(gym.Env):
 
     def _get_obs(self) -> Dict[str, np.ndarray]:
         robot_obs = self.robot.get_obs().astype(np.float32)  # robot state
-        task_obs = self.task.get_obs().astype(np.float32)  # object position, velococity, etc...
+        task_obs = self.task.get_obs().astype(
+            np.float32
+        )  # object position, velococity, etc...
         observation = np.concatenate([robot_obs, task_obs])
         achieved_goal = self.task.get_achieved_goal().astype(np.float32)
         return {
@@ -272,7 +298,11 @@ class RobotTaskEnv(gym.Env):
             self.robot.reset()
             self.task.reset()
         observation = self._get_obs()
-        info = {"is_success": self.task.is_success(observation["achieved_goal"], self.task.get_goal())}
+        info = {
+            "is_success": self.task.is_success(
+                observation["achieved_goal"], self.task.get_goal()
+            )
+        }
         return observation
 
     def save_state(self) -> int:
@@ -303,14 +333,22 @@ class RobotTaskEnv(gym.Env):
         self._saved_goal.pop(state_id)
         self.sim.remove_state(state_id)
 
-    def step(self, action: np.ndarray) -> Tuple[Dict[str, np.ndarray], float, bool, bool, Dict[str, Any]]:
+    def step(
+        self, action: np.ndarray
+    ) -> Tuple[Dict[str, np.ndarray], float, bool, bool, Dict[str, Any]]:
         self.robot.set_action(action)
         self.sim.step()
         observation = self._get_obs()
         # An episode is terminated iff the agent has reached the target
-        terminated = bool(self.task.is_success(observation["achieved_goal"], self.task.get_goal()))
+        terminated = bool(
+            self.task.is_success(observation["achieved_goal"], self.task.get_goal())
+        )
         info = {"is_success": terminated}
-        reward = float(self.task.compute_reward(observation["achieved_goal"], self.task.get_goal(), info))
+        reward = float(
+            self.task.compute_reward(
+                observation["achieved_goal"], self.task.get_goal(), info
+            )
+        )
         return observation, reward, terminated, info
 
     def close(self) -> None:

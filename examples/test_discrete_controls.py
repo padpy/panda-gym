@@ -10,7 +10,7 @@ observation = env.reset()
 for _ in range(1000):
     action = 9
     observation, reward, terminated, info = env.step(action)
-    sleep(1/24)
+    sleep(1 / 24)
 
     if terminated:
         observation = env.reset()

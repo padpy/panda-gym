@@ -30,12 +30,14 @@ class Panda(PyBulletRobot):
         self.action_type = action_type
         self.block_gripper = block_gripper
         self.control_type = control_type
-        n_action = 3 if self.control_type == "ee" else 7  # control (x, y z) if "ee", else, control the 7 joints
+        n_action = (
+            3 if self.control_type == "ee" else 7
+        )  # control (x, y z) if "ee", else, control the 7 joints
         n_action += 0 if self.block_gripper else 1
         if self.action_type == "continuous":
             action_space = spaces.Box(-1.0, 1.0, shape=(n_action,), dtype=np.float32)
         else:
-            action_space = spaces.Discrete(n_action*2+1)
+            action_space = spaces.Discrete(n_action * 2 + 1)
         super().__init__(
             sim,
             body_name="panda",
@@ -43,16 +45,28 @@ class Panda(PyBulletRobot):
             base_position=base_position,
             action_space=action_space,
             joint_indices=np.array([0, 1, 2, 3, 4, 5, 6, 9, 10]),
-            joint_forces=np.array([87.0, 87.0, 87.0, 87.0, 12.0, 120.0, 120.0, 170.0, 170.0]),
+            joint_forces=np.array(
+                [87.0, 87.0, 87.0, 87.0, 12.0, 120.0, 120.0, 170.0, 170.0]
+            ),
         )
 
         self.fingers_indices = np.array([9, 10])
-        self.neutral_joint_values = np.array([0.00, 0.41, 0.00, -1.85, 0.00, 2.26, 0.79, 0.00, 0.00])
+        self.neutral_joint_values = np.array(
+            [0.00, 0.41, 0.00, -1.85, 0.00, 2.26, 0.79, 0.00, 0.00]
+        )
         self.ee_link = 11
-        self.sim.set_lateral_friction(self.body_name, self.fingers_indices[0], lateral_friction=1.0)
-        self.sim.set_lateral_friction(self.body_name, self.fingers_indices[1], lateral_friction=1.0)
-        self.sim.set_spinning_friction(self.body_name, self.fingers_indices[0], spinning_friction=0.001)
-        self.sim.set_spinning_friction(self.body_name, self.fingers_indices[1], spinning_friction=0.001)
+        self.sim.set_lateral_friction(
+            self.body_name, self.fingers_indices[0], lateral_friction=1.0
+        )
+        self.sim.set_lateral_friction(
+            self.body_name, self.fingers_indices[1], lateral_friction=1.0
+        )
+        self.sim.set_spinning_friction(
+            self.body_name, self.fingers_indices[0], spinning_friction=0.001
+        )
+        self.sim.set_spinning_friction(
+            self.body_name, self.fingers_indices[1], spinning_friction=0.001
+        )
 
     def set_action(self, action: Union[np.ndarray, int]) -> None:
         if self.action_type == "continuous":
@@ -64,10 +78,14 @@ class Panda(PyBulletRobot):
             action = np.clip(action, self.action_space.low, self.action_space.high)
             if self.control_type == "ee":
                 ee_displacement = action[:3]
-                target_arm_angles = self.ee_displacement_to_target_arm_angles(ee_displacement)
+                target_arm_angles = self.ee_displacement_to_target_arm_angles(
+                    ee_displacement
+                )
             else:
                 arm_joint_ctrl = action[:7]
-                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(arm_joint_ctrl)
+                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(
+                    arm_joint_ctrl
+                )
 
             if self.block_gripper:
                 target_fingers_width = 0
@@ -76,12 +94,14 @@ class Panda(PyBulletRobot):
                 fingers_width = self.get_fingers_width()
                 target_fingers_width = fingers_width + fingers_ctrl
         else:
-            n_actions = (3 if self.control_type == "ee" else 7) + (0 if self.block_gripper else 1)
+            n_actions = (3 if self.control_type == "ee" else 7) + (
+                0 if self.block_gripper else 1
+            )
             action = action - n_actions
             if self.control_type == "ee":
                 ee_displacement = np.zeros(3)
             else:
-                arm_joint_ctrl =  np.zeros(7)
+                arm_joint_ctrl = np.zeros(7)
 
             if self.block_gripper:
                 target_fingers_width = 0
@@ -92,19 +112,27 @@ class Panda(PyBulletRobot):
                 target_fingers_width += 0.01 * np.sign(action)
             elif 0 < abs(action) < n_actions:
                 if self.control_type == "ee":
-                    ee_displacement[abs(action)-1] += 0.5 * np.sign(action)
+                    ee_displacement[abs(action) - 1] += 0.5 * np.sign(action)
                 else:
-                    arm_joint_ctrl[abs(action)-1] += 0.5 * np.sign(action)
-                    
-            if self.control_type == "ee":
-                target_arm_angles = self.ee_displacement_to_target_arm_angles(ee_displacement)
-            else:
-                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(arm_joint_ctrl)
+                    arm_joint_ctrl[abs(action) - 1] += 0.5 * np.sign(action)
 
-        target_angles = np.concatenate((target_arm_angles, [target_fingers_width / 2, target_fingers_width / 2]))
+            if self.control_type == "ee":
+                target_arm_angles = self.ee_displacement_to_target_arm_angles(
+                    ee_displacement
+                )
+            else:
+                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(
+                    arm_joint_ctrl
+                )
+
+        target_angles = np.concatenate(
+            (target_arm_angles, [target_fingers_width / 2, target_fingers_width / 2])
+        )
         self.control_joints(target_angles=target_angles)
 
-    def ee_displacement_to_target_arm_angles(self, ee_displacement: np.ndarray) -> np.ndarray:
+    def ee_displacement_to_target_arm_angles(
+        self, ee_displacement: np.ndarray
+    ) -> np.ndarray:
         """Compute the target arm angles from the end-effector displacement.
 
         Args:
@@ -121,12 +149,16 @@ class Panda(PyBulletRobot):
         target_ee_position[2] = np.max((0, target_ee_position[2]))
         # compute the new joint angles
         target_arm_angles = self.inverse_kinematics(
-            link=self.ee_link, position=target_ee_position, orientation=np.array([1.0, 0.0, 0.0, 0.0])
+            link=self.ee_link,
+            position=target_ee_position,
+            orientation=np.array([1.0, 0.0, 0.0, 0.0]),
         )
         target_arm_angles = target_arm_angles[:7]  # remove fingers angles
         return target_arm_angles
 
-    def arm_joint_ctrl_to_target_arm_angles(self, arm_joint_ctrl: np.ndarray) -> np.ndarray:
+    def arm_joint_ctrl_to_target_arm_angles(
+        self, arm_joint_ctrl: np.ndarray
+    ) -> np.ndarray:
         """Compute the target arm angles from the arm joint control.
 
         Args:
@@ -137,7 +169,9 @@ class Panda(PyBulletRobot):
         """
         arm_joint_ctrl = arm_joint_ctrl * 0.05  # limit maximum change in position
         # get the current position and the target position
-        current_arm_joint_angles = np.array([self.get_joint_angle(joint=i) for i in range(7)])
+        current_arm_joint_angles = np.array(
+            [self.get_joint_angle(joint=i) for i in range(7)]
+        )
         target_arm_angles = current_arm_joint_angles + arm_joint_ctrl
         return target_arm_angles
 
