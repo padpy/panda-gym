@@ -21,6 +21,7 @@ class PandaFlipEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -39,6 +40,7 @@ class PandaFlipEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -49,7 +51,7 @@ class PandaFlipEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = Flip(sim, reward_type=reward_type)
         super().__init__(
             robot,
@@ -72,6 +74,7 @@ class PandaPickAndPlaceEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -89,6 +92,7 @@ class PandaPickAndPlaceEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -99,7 +103,7 @@ class PandaPickAndPlaceEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = PickAndPlace(sim, reward_type=reward_type)
         super().__init__(
             robot,
@@ -122,6 +126,7 @@ class PandaPushEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -139,6 +144,7 @@ class PandaPushEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -149,7 +155,7 @@ class PandaPushEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = Push(sim, reward_type=reward_type)
         super().__init__(
             robot,
@@ -172,6 +178,7 @@ class PandaReachEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -189,6 +196,7 @@ class PandaReachEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -199,7 +207,7 @@ class PandaReachEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = Reach(sim, reward_type=reward_type, get_ee_position=robot.get_ee_position)
         super().__init__(
             robot,
@@ -222,6 +230,7 @@ class PandaSlideEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -239,6 +248,7 @@ class PandaSlideEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -249,7 +259,7 @@ class PandaSlideEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=True, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = Slide(sim, reward_type=reward_type)
         super().__init__(
             robot,
@@ -272,6 +282,7 @@ class PandaStackEnv(RobotTaskEnv):
         reward_type (str, optional): "sparse" or "dense". Defaults to "sparse".
         control_type (str, optional): "ee" to control end-effector position or "joints" to control joint values.
             Defaults to "ee".
+        action_type (str, optional): "continuous" or "discrete". Defaults to "continuous".
         renderer (str, optional): Renderer, either "Tiny" or OpenGL". Defaults to "Tiny" if render mode is "human"
             and "OpenGL" if render mode is "rgb_array". Only "OpenGL" is available for human render mode.
         render_width (int, optional): Image width. Defaults to 720.
@@ -289,6 +300,7 @@ class PandaStackEnv(RobotTaskEnv):
         render_mode: str = "rgb_array",
         reward_type: str = "sparse",
         control_type: str = "ee",
+        action_type: str = "continuous",
         renderer: str = "Tiny",
         render_width: int = 720,
         render_height: int = 480,
@@ -299,7 +311,7 @@ class PandaStackEnv(RobotTaskEnv):
         render_roll: float = 0,
     ) -> None:
         sim = PyBullet(render_mode=render_mode, renderer=renderer)
-        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type)
+        robot = Panda(sim, block_gripper=False, base_position=np.array([-0.6, 0.0, 0.0]), control_type=control_type, action_type=action_type)
         task = Stack(sim, reward_type=reward_type)
         super().__init__(
             robot,

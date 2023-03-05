@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from gym import spaces
@@ -24,13 +24,18 @@ class Panda(PyBulletRobot):
         block_gripper: bool = False,
         base_position: Optional[np.ndarray] = None,
         control_type: str = "ee",
+        action_type: str = "continuous",
     ) -> None:
         base_position = base_position if base_position is not None else np.zeros(3)
+        self.action_type = action_type
         self.block_gripper = block_gripper
         self.control_type = control_type
         n_action = 3 if self.control_type == "ee" else 7  # control (x, y z) if "ee", else, control the 7 joints
         n_action += 0 if self.block_gripper else 1
-        action_space = spaces.Box(-1.0, 1.0, shape=(n_action,), dtype=np.float32)
+        if self.action_type == "continuous":
+            action_space = spaces.Box(-1.0, 1.0, shape=(n_action,), dtype=np.float32)
+        else:
+            action_space = spaces.Discrete(n_action*2+1)
         super().__init__(
             sim,
             body_name="panda",
@@ -49,22 +54,52 @@ class Panda(PyBulletRobot):
         self.sim.set_spinning_friction(self.body_name, self.fingers_indices[0], spinning_friction=0.001)
         self.sim.set_spinning_friction(self.body_name, self.fingers_indices[1], spinning_friction=0.001)
 
-    def set_action(self, action: np.ndarray) -> None:
-        action = action.copy()  # ensure action don't change
-        action = np.clip(action, self.action_space.low, self.action_space.high)
-        if self.control_type == "ee":
-            ee_displacement = action[:3]
-            target_arm_angles = self.ee_displacement_to_target_arm_angles(ee_displacement)
-        else:
-            arm_joint_ctrl = action[:7]
-            target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(arm_joint_ctrl)
+    def set_action(self, action: Union[np.ndarray, int]) -> None:
+        if self.action_type == "continuous":
+            action = action.copy()  # ensure action don't change
+        target_arm_angles = None
+        target_fingers_width = None
 
-        if self.block_gripper:
-            target_fingers_width = 0
+        if self.action_type == "countinous":
+            action = np.clip(action, self.action_space.low, self.action_space.high)
+            if self.control_type == "ee":
+                ee_displacement = action[:3]
+                target_arm_angles = self.ee_displacement_to_target_arm_angles(ee_displacement)
+            else:
+                arm_joint_ctrl = action[:7]
+                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(arm_joint_ctrl)
+
+            if self.block_gripper:
+                target_fingers_width = 0
+            else:
+                fingers_ctrl = action[-1] * 0.2  # limit maximum change in position
+                fingers_width = self.get_fingers_width()
+                target_fingers_width = fingers_width + fingers_ctrl
         else:
-            fingers_ctrl = action[-1] * 0.2  # limit maximum change in position
-            fingers_width = self.get_fingers_width()
-            target_fingers_width = fingers_width + fingers_ctrl
+            n_actions = (3 if self.control_type == "ee" else 7) + (0 if self.block_gripper else 1)
+            action = action - n_actions
+            if self.control_type == "ee":
+                ee_displacement = np.zeros(3)
+            else:
+                arm_joint_ctrl =  np.zeros(7)
+
+            if self.block_gripper:
+                target_fingers_width = 0
+            else:
+                target_fingers_width = self.get_fingers_width()
+
+            if abs(action) == n_actions:
+                target_fingers_width += 0.01 * np.sign(action)
+            elif 0 < abs(action) < n_actions:
+                if self.control_type == "ee":
+                    ee_displacement[abs(action)-1] += 0.5 * np.sign(action)
+                else:
+                    arm_joint_ctrl[abs(action)-1] += 0.5 * np.sign(action)
+                    
+            if self.control_type == "ee":
+                target_arm_angles = self.ee_displacement_to_target_arm_angles(ee_displacement)
+            else:
+                target_arm_angles = self.arm_joint_ctrl_to_target_arm_angles(arm_joint_ctrl)
 
         target_angles = np.concatenate((target_arm_angles, [target_fingers_width / 2, target_fingers_width / 2]))
         self.control_joints(target_angles=target_angles)
