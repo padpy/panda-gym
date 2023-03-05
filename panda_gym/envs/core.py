@@ -230,7 +230,7 @@ class RobotTaskEnv(gym.Env):
         self.metadata["render_fps"] = 1 / self.sim.dt
         self.robot = robot
         self.task = task
-        observation, _ = self.reset()  # required for init; seed can be changed later
+        observation = self.reset()  # required for init; seed can be changed later
         observation_shape = observation["observation"].shape
         achieved_goal_shape = observation["achieved_goal"].shape
         desired_goal_shape = observation["achieved_goal"].shape
@@ -273,7 +273,7 @@ class RobotTaskEnv(gym.Env):
             self.task.reset()
         observation = self._get_obs()
         info = {"is_success": self.task.is_success(observation["achieved_goal"], self.task.get_goal())}
-        return observation, info
+        return observation
 
     def save_state(self) -> int:
         """Save the current state of the envrionment. Restore with `restore_state`.
