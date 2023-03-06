@@ -1,4 +1,4 @@
-import gymnasium as gym
+import gym
 import numpy as np
 import pybullet
 import pytest
@@ -14,12 +14,12 @@ def test_save_and_restore_state():
 
     # Perform the action
     action = env.action_space.sample()
-    observation1, _, _, _, _ = env.step(action)
+    observation1, _, _, _ = env.step(action)
 
     # Restore and perform the same action
     env.reset()
     env.restore_state(state_id)
-    observation2, _, _, _, _ = env.step(action)
+    observation2, _, _, _ = env.step(action)
 
     # The observations in both cases should be equals
     assert np.all(observation1["achieved_goal"] == observation2["achieved_goal"])

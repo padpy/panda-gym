@@ -6,7 +6,7 @@ Train with stable-baselines3
 .. warning::
     SB3 is not compatible with ``panda-gym`` v3  for the moment. (See `SB3/PR#780 <https://github.com/DLR-RM/stable-baselines3/pull/780>`_). The following documentation is therefore not yet valid. To use ``panda-gym`` with SB3, you will have to use ``panda-gym==2.0.0``.
 
-You can train the environments with any gymnasium compatible library. In this documentation we explain how to use one of them: `stable-baselines3 (SB3) <https://stable-baselines3.readthedocs.io/en/master/index.html>`_.
+You can train the environments with any gym compatible library. In this documentation we explain how to use one of them: `stable-baselines3 (SB3) <https://stable-baselines3.readthedocs.io/en/master/index.html>`_.
 
 Install SB3
 -----------

@@ -1,4 +1,4 @@
-import gymnasium as gym
+import gym
 
 import panda_gym
 
@@ -8,9 +8,9 @@ observation, info = env.reset()
 
 for _ in range(1000):
     action = env.action_space.sample()
-    observation, reward, terminated, truncated, info = env.step(action)
+    observation, reward, terminated, info = env.step(action)
 
-    if terminated or truncated:
+    if terminated:
         observation, info = env.reset()
 
 env.close()

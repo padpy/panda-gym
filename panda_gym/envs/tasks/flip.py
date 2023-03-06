@@ -24,7 +24,9 @@ class Flip(Task):
         self.obj_range_high = np.array([obj_xy_range / 2, obj_xy_range / 2, 0])
         with self.sim.no_rendering():
             self._create_scene()
-            self.sim.place_visualizer(target_position=np.zeros(3), distance=0.9, yaw=45, pitch=-30)
+            self.sim.place_visualizer(
+                target_position=np.zeros(3), distance=0.9, yaw=45, pitch=-30
+            )
 
     def _create_scene(self) -> None:
         """Create the scene."""
@@ -53,7 +55,9 @@ class Flip(Task):
         object_rotation = self.sim.get_base_rotation("object", "quaternion")
         object_velocity = self.sim.get_base_velocity("object")
         object_angular_velocity = self.sim.get_base_angular_velocity("object")
-        observation = np.concatenate([object_position, object_rotation, object_velocity, object_angular_velocity])
+        observation = np.concatenate(
+            [object_position, object_rotation, object_velocity, object_angular_velocity]
+        )
         return observation
 
     def get_achieved_goal(self) -> np.ndarray:
@@ -63,7 +67,9 @@ class Flip(Task):
     def reset(self) -> None:
         self.goal = self._sample_goal()
         object_position, object_orientation = self._sample_object()
-        self.sim.set_base_pose("target", np.array([0.0, 0.0, 3 * self.object_size / 2]), self.goal)
+        self.sim.set_base_pose(
+            "target", np.array([0.0, 0.0, 3 * self.object_size / 2]), self.goal
+        )
         self.sim.set_base_pose("object", object_position, object_orientation)
 
     def _sample_goal(self) -> np.ndarray:
@@ -79,11 +85,15 @@ class Flip(Task):
         object_rotation = np.zeros(3)
         return object_position, object_rotation
 
-    def is_success(self, achieved_goal: np.ndarray, desired_goal: np.ndarray) -> np.ndarray:
+    def is_success(
+        self, achieved_goal: np.ndarray, desired_goal: np.ndarray
+    ) -> np.ndarray:
         d = angle_distance(achieved_goal, desired_goal)
         return np.array(d < self.distance_threshold, dtype=bool)
 
-    def compute_reward(self, achieved_goal, desired_goal, info: Dict[str, Any]) -> np.ndarray:
+    def compute_reward(
+        self, achieved_goal, desired_goal, info: Dict[str, Any]
+    ) -> np.ndarray:
         d = angle_distance(achieved_goal, desired_goal)
         if self.reward_type == "sparse":
             return -np.array(d > self.distance_threshold, dtype=np.float32)

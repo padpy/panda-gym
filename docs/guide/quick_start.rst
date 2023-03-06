@@ -7,7 +7,7 @@ Once ``panda-gym`` installed, you can start the "Reach" task by executing the fo
 
 .. code-block:: python
 
-    import gymnasium as gym
+    import gym
     import panda_gym
 
     env = gym.make('PandaReach-v3', render_mode="human")
@@ -16,9 +16,9 @@ Once ``panda-gym`` installed, you can start the "Reach" task by executing the fo
 
     for _ in range(1000):
         action = env.action_space.sample() # random action
-        observation, reward, terminated, truncated, info = env.step(action)
+        observation, reward, terminated, info = env.step(action)
 
-        if terminated or truncated:
+        if terminated:
             observation, info = env.reset()
     
 

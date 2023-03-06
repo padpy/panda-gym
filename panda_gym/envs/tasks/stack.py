@@ -25,7 +25,9 @@ class Stack(Task):
         self.obj_range_high = np.array([obj_xy_range / 2, obj_xy_range / 2, 0])
         with self.sim.no_rendering():
             self._create_scene()
-            self.sim.place_visualizer(target_position=np.zeros(3), distance=0.9, yaw=45, pitch=-30)
+            self.sim.place_visualizer(
+                target_position=np.zeros(3), distance=0.9, yaw=45, pitch=-30
+            )
 
     def _create_scene(self) -> None:
         self.sim.create_plane(z_offset=-0.4)
@@ -66,11 +68,15 @@ class Stack(Task):
         object1_position = np.array(self.sim.get_base_position("object1"))
         object1_rotation = np.array(self.sim.get_base_rotation("object1"))
         object1_velocity = np.array(self.sim.get_base_velocity("object1"))
-        object1_angular_velocity = np.array(self.sim.get_base_angular_velocity("object1"))
+        object1_angular_velocity = np.array(
+            self.sim.get_base_angular_velocity("object1")
+        )
         object2_position = np.array(self.sim.get_base_position("object2"))
         object2_rotation = np.array(self.sim.get_base_rotation("object2"))
         object2_velocity = np.array(self.sim.get_base_velocity("object2"))
-        object2_angular_velocity = np.array(self.sim.get_base_angular_velocity("object2"))
+        object2_angular_velocity = np.array(
+            self.sim.get_base_angular_velocity("object2")
+        )
         observation = np.concatenate(
             [
                 object1_position,
@@ -96,12 +102,20 @@ class Stack(Task):
         object1_position, object2_position = self._sample_objects()
         self.sim.set_base_pose("target1", self.goal[:3], np.array([0.0, 0.0, 0.0, 1.0]))
         self.sim.set_base_pose("target2", self.goal[3:], np.array([0.0, 0.0, 0.0, 1.0]))
-        self.sim.set_base_pose("object1", object1_position, np.array([0.0, 0.0, 0.0, 1.0]))
-        self.sim.set_base_pose("object2", object2_position, np.array([0.0, 0.0, 0.0, 1.0]))
+        self.sim.set_base_pose(
+            "object1", object1_position, np.array([0.0, 0.0, 0.0, 1.0])
+        )
+        self.sim.set_base_pose(
+            "object2", object2_position, np.array([0.0, 0.0, 0.0, 1.0])
+        )
 
     def _sample_goal(self) -> np.ndarray:
-        goal1 = np.array([0.0, 0.0, self.object_size / 2])  # z offset for the cube center
-        goal2 = np.array([0.0, 0.0, 3 * self.object_size / 2])  # z offset for the cube center
+        goal1 = np.array(
+            [0.0, 0.0, self.object_size / 2]
+        )  # z offset for the cube center
+        goal2 = np.array(
+            [0.0, 0.0, 3 * self.object_size / 2]
+        )  # z offset for the cube center
         noise = self.np_random.uniform(self.goal_range_low, self.goal_range_high)
         goal1 += noise
         goal2 += noise
@@ -118,12 +132,16 @@ class Stack(Task):
         # if distance(object1_position, object2_position) > 0.1:
         return object1_position, object2_position
 
-    def is_success(self, achieved_goal: np.ndarray, desired_goal: np.ndarray) -> np.ndarray:
+    def is_success(
+        self, achieved_goal: np.ndarray, desired_goal: np.ndarray
+    ) -> np.ndarray:
         # must be vectorized !!
         d = distance(achieved_goal, desired_goal)
         return np.array((d < self.distance_threshold), dtype=bool)
 
-    def compute_reward(self, achieved_goal, desired_goal, info: Dict[str, Any]) -> np.ndarray:
+    def compute_reward(
+        self, achieved_goal, desired_goal, info: Dict[str, Any]
+    ) -> np.ndarray:
         d = distance(achieved_goal, desired_goal)
         if self.reward_type == "sparse":
             return -np.array((d > self.distance_threshold), dtype=np.float32)

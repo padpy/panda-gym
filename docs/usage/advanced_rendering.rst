@@ -8,11 +8,11 @@ Renderer
 
 There are two render modes available - ``"human"`` and ``"rgb_array"``. The ``"human"`` mode opens a window to display the live scene, while the ``"rgb_array"`` mode renders the scene as an RGB array.
 
-When it comes to renderers, there are two options: OpenGL and Tiny Renderer. The OpenGL engine is used when the render mode is set to ``"human"``. However, when the render mode is set to ``"rgb_array"`` you have the choice between using either the OpenGL or Tiny Renderer engine. The Tiny Renderer can work in headless mode, but it may not produce as high-quality results as the OpenGL engine, particularly in regards to transparency, background and shadows. If headless mode is not a requirement, it is recommended to use the OpenGL engine. To do this, pass ``renderer="OpenGL"`` to the ``gymnasium.make`` function:
+When it comes to renderers, there are two options: OpenGL and Tiny Renderer. The OpenGL engine is used when the render mode is set to ``"human"``. However, when the render mode is set to ``"rgb_array"`` you have the choice between using either the OpenGL or Tiny Renderer engine. The Tiny Renderer can work in headless mode, but it may not produce as high-quality results as the OpenGL engine, particularly in regards to transparency, background and shadows. If headless mode is not a requirement, it is recommended to use the OpenGL engine. To do this, pass ``renderer="OpenGL"`` to the ``gym.make`` function:
 
 .. code-block:: python
 
-    import gymnasium as gym
+    import gym
     import panda_gym
 
     env = gym.make("PandaReach-v3", render_mode="rgb_array", renderer="OpenGL")
@@ -52,7 +52,7 @@ Example
 
 .. code-block:: python
 
-    import gymnasium as gym
+    import gym
     import panda_gym
 
 
