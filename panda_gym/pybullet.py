@@ -262,6 +262,21 @@ class PyBullet:
         orientation = self.physics_client.getLinkState(self._bodies_idx[body], link)[1]
         return np.array(orientation)
 
+
+    def get_contact_normals(self, bodyA: int, bodyB: int) -> np.ndarray:
+        """Get the position of points between two bodies.
+
+        Args:
+            bodyA (int): Index of the body.
+            bodyB (int): Index of the body.
+
+        Returns:
+            np.ndarray: The position, as (x, y, z).
+        """
+        points = p.getContactPoints(bodyA=self._bodies_idx[bodyA], bodyB=self._bodies_idx[bodyB])
+        normals = np.array([point[7] for point in points])
+        return np.array(normals)
+
     def get_link_velocity(self, body: str, link: int) -> np.ndarray:
         """Get the velocity of the link of the body.
 

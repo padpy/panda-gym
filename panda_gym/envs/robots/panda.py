@@ -74,7 +74,7 @@ class Panda(PyBulletRobot):
         target_arm_angles = None
         target_fingers_width = None
 
-        if self.action_type == "countinous":
+        if self.action_type == "continuous":
             action = np.clip(action, self.action_space.low, self.action_space.high)
             if self.control_type == "ee":
                 ee_displacement = action[:3]

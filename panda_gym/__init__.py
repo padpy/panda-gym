@@ -2,7 +2,7 @@ import os
 
 from gym.envs.registration import register
 
-MAX_EPISODE_STEPS = 100
+MAX_EPISODE_STEPS = 100 # TODO: Adjust this to increase the number of steps per episode
 
 with open(os.path.join(os.path.dirname(__file__), "version.txt"), "r") as file_handler:
     __version__ = file_handler.read().strip()
@@ -24,6 +24,15 @@ for reward_type in ["sparse", "dense"]:
                     control_suffix, reward_suffix, action_suffix
                 ),
                 entry_point="panda_gym.envs:PandaReachEnv",
+                kwargs=kwargs,
+                max_episode_steps=MAX_EPISODE_STEPS,
+            )
+
+            register(
+                id="PandaGrasp{}{}{}-v3".format(
+                    control_suffix, reward_suffix, action_suffix
+                ),
+                entry_point="panda_gym.envs:PandaGraspEnv",
                 kwargs=kwargs,
                 max_episode_steps=MAX_EPISODE_STEPS,
             )
