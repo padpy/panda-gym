@@ -11,6 +11,7 @@ class PickAndPlace(Task):
     def __init__(
         self,
         sim: PyBullet,
+        get_ee_position,
         reward_type: str = "sparse",
         distance_threshold: float = 0.05,
         goal_xy_range: float = 0.3,
@@ -20,6 +21,7 @@ class PickAndPlace(Task):
         super().__init__(sim)
         self.reward_type = reward_type
         self.distance_threshold = distance_threshold
+        self.get_ee_position = get_ee_position
         self.object_size = 0.04
         self.goal_range_low = np.array([-goal_xy_range / 2, -goal_xy_range / 2, 0])
         self.goal_range_high = np.array(
@@ -62,30 +64,42 @@ class PickAndPlace(Task):
         observation = np.concatenate(
             [object_position, object_rotation, object_velocity, object_angular_velocity]
         )
+
+        # Update the object position in the goal vector.
+        # This is to prevent issues with the arm moving
+        # the object then being anchored to the origin position
+        self.goal[2:5] = object_position
+
         return observation
 
     def get_achieved_goal(self) -> np.ndarray:
-        object_position = np.array(self.sim.get_base_position("object"))
-        return object_position
+        return np.concatenate(
+            [
+                np.array([self.grasped(), self.touching_object()], dtype=np.float32),
+                self.get_ee_position(),
+                np.array(self.sim.get_base_position("object")),
+            ]
+        )
 
     def reset(self) -> None:
-        self.goal = self._sample_goal()
+        target_position = self._sample_target()
         object_position = self._sample_object()
-        self.sim.set_base_pose("target", self.goal, np.array([0.0, 0.0, 0.0, 1.0]))
+        self.sim.set_base_pose("target", target_position, np.array([0.0, 0.0, 0.0, 1.0]))
         self.sim.set_base_pose(
             "object", object_position, np.array([0.0, 0.0, 0.0, 1.0])
         )
+        self.goal = np.concatenate([np.array([1.0, 1.0]), object_position, target_position])
 
-    def _sample_goal(self) -> np.ndarray:
-        """Sample a goal."""
-        goal = np.array(
+    def _sample_target(self) -> np.ndarray:
+        """Sample a target."""
+        target = np.array(
             [0.0, 0.0, self.object_size / 2]
         )  # z offset for the cube center
         noise = self.np_random.uniform(self.goal_range_low, self.goal_range_high)
         if self.np_random.random() < 0.3:
             noise[2] = 0.0
-        goal += noise
-        return goal
+        target += noise
+        return target
 
     def _sample_object(self) -> np.ndarray:
         """Randomize start position of object."""
@@ -97,14 +111,64 @@ class PickAndPlace(Task):
     def is_success(
         self, achieved_goal: np.ndarray, desired_goal: np.ndarray
     ) -> np.ndarray:
-        d = distance(achieved_goal, desired_goal)
+        if achieved_goal.ndim == 1:
+            d = distance(achieved_goal[5:8], desired_goal[5:8])
+        else:
+            d = distance(achieved_goal[:, 5:8], desired_goal[:, 5:8])
         return np.array(d < self.distance_threshold, dtype=bool)
 
     def compute_reward(
         self, achieved_goal, desired_goal, info: Dict[str, Any]
     ) -> np.ndarray:
-        d = distance(achieved_goal, desired_goal)
         if self.reward_type == "sparse":
-            return -np.array(d > self.distance_threshold, dtype=np.float32)
+            if achieved_goal.ndim == 1:
+                d = distance(achieved_goal, desired_goal)
+            else:
+                d = distance(achieved_goal[:, 5:8], desired_goal[:, 5:8])
+
+            reward = -np.array(d > self.distance_threshold, dtype=np.float32)
+            return reward
+
         else:
-            return -d.astype(np.float32)
+            if achieved_goal.ndim == 1:
+                obj_d = distance(achieved_goal[2:5], desired_goal[2:5])
+                target_d = distance(achieved_goal[5:8], desired_goal[5:8])
+                distance_reward = self.distance_threshold - obj_d
+                target_reward = self.distance_threshold - target_d
+                distance_reward[distance_reward > 0] = 0
+                target_reward[target_reward > 0] = 0
+
+                contact_reward = achieved_goal[1] - desired_goal[1]
+                grasp_reward = achieved_goal[0] - desired_goal[0]
+            else:
+                obj_d = distance(achieved_goal[:, 2:5], desired_goal[:, 2:5])
+                target_d = distance(achieved_goal[:, 5:8], desired_goal[:, 5:8])
+                distance_reward = self.distance_threshold - obj_d
+                target_reward = self.distance_threshold - target_d
+                distance_reward[distance_reward > 0] = 0
+                target_reward[target_reward > 0] = 0
+
+                contact_reward = achieved_goal[:, 1] - desired_goal[:, 1]
+                grasp_reward = achieved_goal[:, 0] - desired_goal[:, 0]
+
+            return (
+                1 / 6 * distance_reward
+                + 1 / 6 * contact_reward
+                + 1 / 6 * grasp_reward
+                + 0.5 * target_reward
+            )
+
+    def grasped(self) -> bool:
+        left_contact = False
+        right_contact = False
+
+        normals = self.sim.get_contact_normals("panda", "object")
+        if np.any(normals):
+            left_contact = np.any(normals[:, 1] > 0.99)
+            right_contact = np.any(normals[:, 1] < -0.99)
+
+        return left_contact and right_contact
+
+    def touching_object(self) -> bool:
+        normals = self.sim.get_contact_normals("panda", "object")
+        return np.any(normals)

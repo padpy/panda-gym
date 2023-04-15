@@ -46,6 +46,14 @@ class Grasp(Task):
             position=np.array([0.0, 0.0, self.object_size / 2]),
             rgba_color=np.array([0.1, 0.9, 0.1, 1.0]),
         )
+        self.sim.create_box(
+            body_name="target",
+            half_extents=np.ones(3) * self.object_size / 2,
+            mass=0.0,
+            ghost=True,
+            position=np.array([0.0, 0.0, 0.05]),
+            rgba_color=np.array([0.1, 0.9, 0.1, 0.0]),  # transparent
+        )
 
     def get_obs(self) -> np.ndarray:
         # position, rotation of the object
@@ -56,32 +64,41 @@ class Grasp(Task):
         observation = np.concatenate(
             [object_position, object_rotation, object_velocity, object_angular_velocity]
         )
+
+        # Update the object position in the goal vector.
+        # This is to prevent issues with the arm moving
+        # the object then being anchored to the origin position
+        self.goal[2:5] = object_position
+
         return observation
 
     def get_achieved_goal(self) -> np.ndarray:
-        if self.reward_type == "sparse":
-            achieved_goal = np.array([self.grasped()], dtype=np.float32)
-        else:
-            achieved_goal = np.concatenate([np.array([self.grasped(), self.touching_object()], dtype=np.float32), self.get_ee_position()])
-
-        return achieved_goal
+        return np.concatenate(
+            [
+                np.array([self.grasped(), self.touching_object()], dtype=np.float32),
+                self.get_ee_position(),
+                np.array(self.sim.get_base_position("object")),
+            ]
+        )
 
     def reset(self) -> None:
         object_position = self._sample_object()
-        self.goal = self._sample_goal(object_position)
+        self.sim.set_base_pose("target", object_position, np.array([0.0, 0.0, 0.0, 1.0]))
         self.sim.set_base_pose(
             "object", object_position, np.array([0.0, 0.0, 0.0, 1.0])
         )
+        self.goal = np.concatenate([np.array([1.0, 1.0]), object_position, object_position])
 
-    def _sample_goal(self, object_position) -> np.ndarray:
-        """Sample a goal."""
-        if self.reward_type == "sparse":
-            return np.array([1.0], dtype=np.float32)
-        else:
-            goal = np.concatenate([np.array(
-                [1.0, 1.0]
-            ), object_position])
-        return goal
+    def _sample_target(self) -> np.ndarray:
+        """Sample a target."""
+        target = np.array(
+            [0.0, 0.0, self.object_size / 2]
+        )  # z offset for the cube center
+        noise = self.np_random.uniform(self.goal_range_low, self.goal_range_high)
+        if self.np_random.random() < 0.3:
+            noise[2] = 0.0
+        target += noise
+        return target
 
     def _sample_object(self) -> np.ndarray:
         """Randomize start position of object."""
@@ -99,28 +116,30 @@ class Grasp(Task):
         self, achieved_goal, desired_goal, info: Dict[str, Any]
     ) -> np.ndarray:
         if self.reward_type == "sparse":
-            return (achieved_goal - desired_goal).mean()
+            if achieved_goal.ndim == 1:
+                grasp_reward = achieved_goal[0] - desired_goal[0]
+            else:
+                grasp_reward = achieved_goal[:, 0] - desired_goal[:, 0]
+            return grasp_reward
+
         else:
-            d = distance(achieved_goal[2:], desired_goal[2:])
-            distance_reward = self.distance_threshold - d
-            distance_reward[distance_reward > 0] = 0
 
             if achieved_goal.ndim == 1:
-                d = distance(achieved_goal[2:], desired_goal[2:])
+                d = distance(achieved_goal[2:5], desired_goal[2:5])
                 distance_reward = self.distance_threshold - d
                 distance_reward[distance_reward > 0] = 0
 
                 contact_reward = achieved_goal[1] - desired_goal[1]
                 grasp_reward = achieved_goal[0] - desired_goal[0]
             else:
-                d = distance(achieved_goal[:,2:], desired_goal[:,2:])
+                d = distance(achieved_goal[:, 2:5], desired_goal[:, 2:5])
                 distance_reward = self.distance_threshold - d
                 distance_reward[distance_reward > 0] = 0
 
-                contact_reward = achieved_goal[:,1] - desired_goal[:,1]
-                grasp_reward = achieved_goal[:,0] - desired_goal[:,0]
+                contact_reward = achieved_goal[:, 1] - desired_goal[:, 1]
+                grasp_reward = achieved_goal[:, 0] - desired_goal[:, 0]
 
-            return 0.25*distance_reward + 0.25*contact_reward + 0.5*grasp_reward
+            return 0.25 * distance_reward + 0.25 * contact_reward + 0.5 * grasp_reward
 
     def grasped(self) -> bool:
         left_contact = False
@@ -128,8 +147,8 @@ class Grasp(Task):
 
         normals = self.sim.get_contact_normals("panda", "object")
         if np.any(normals):
-            left_contact = np.any(normals[:,1] > 0.99)
-            right_contact = np.any(normals[:,1] < -0.99)
+            left_contact = np.any(normals[:, 1] > 0.99)
+            right_contact = np.any(normals[:, 1] < -0.99)
 
         return left_contact and right_contact
 

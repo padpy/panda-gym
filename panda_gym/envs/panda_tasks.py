@@ -117,7 +117,7 @@ class PandaPickAndPlaceEnv(RobotTaskEnv):
             control_type=control_type,
             action_type=action_type,
         )
-        task = PickAndPlace(sim, reward_type=reward_type)
+        task = PickAndPlace(sim, get_ee_position=robot.get_ee_position, reward_type=reward_type)
         super().__init__(
             robot,
             task,
