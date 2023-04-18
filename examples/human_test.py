@@ -1,3 +1,4 @@
+# This requires SUDO to run
 import gym
 
 import panda_gym
@@ -5,8 +6,9 @@ import keyboard
 import numpy as np
 from time import sleep
 import sys
+EE = False
 
-env = gym.make("PandaPickAndPlaceDense-v3", render_mode="human",)
+env = gym.make("PandaReachDense-v4", render_mode="human")
 
 observation = env.reset()
 
@@ -33,11 +35,11 @@ while True:
         action += np.array([0, 0, 0, 0.05])
 
     sys.stdout.write("\033[K")
-    print(f'Reward: {env.env.task.compute_reward(env.env.task.get_achieved_goal(), env.env.task.goal, None)}, Grasped: {env.env.task.is_success(env.env.task.get_achieved_goal(), env.env.task.goal)}')
+    print(f'Reward: {env.env.task.compute_reward(env.env.task.get_achieved_goal(), env.env.task.goal, None)}, Achieved: {env.env.task.get_achieved_goal()} Goal: {env.env.task.goal} Success: {env.env.task.is_success(env.env.task.get_achieved_goal(), env.env.task.goal)}')
     sys.stdout.write("\033[F")
 
     action = np.array(action)
-    observation, reward, terminated, info = env.step(action)
+    observation, reward, terminated, info = env.step(action if EE else action[0:3])
 
     sleep(1/24)
 

@@ -68,7 +68,7 @@ class Grasp(Task):
         # Update the object position in the goal vector.
         # This is to prevent issues with the arm moving
         # the object then being anchored to the origin position
-        self.goal[2:5] = object_position
+        # self.goal[2:5] = object_position
 
         return observation
 

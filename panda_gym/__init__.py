@@ -29,6 +29,15 @@ for reward_type in ["sparse", "dense"]:
             )
 
             register(
+                id="PandaReach{}{}{}-v4".format(
+                    control_suffix, reward_suffix, action_suffix
+                ),
+                entry_point="panda_gym.envs:PandaReachCurriculumEnv",
+                kwargs=kwargs,
+                max_episode_steps=MAX_EPISODE_STEPS,
+            )
+
+            register(
                 id="PandaGrasp{}{}{}-v3".format(
                     control_suffix, reward_suffix, action_suffix
                 ),
