@@ -65,11 +65,6 @@ class PickAndPlace(Task):
             [object_position, object_rotation, object_velocity, object_angular_velocity]
         )
 
-        # Update the object position in the goal vector.
-        # This is to prevent issues with the arm moving
-        # the object then being anchored to the origin position
-        self.goal[2:5] = object_position
-
         return observation
 
     def get_achieved_goal(self) -> np.ndarray:
