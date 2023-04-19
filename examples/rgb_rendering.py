@@ -3,20 +3,20 @@ from numpngw import write_apng  # pip install numpngw
 
 import panda_gym
 
-env = gym.make("PandaStack-v3", render_mode="rgb_array")
+env = gym.make("PandaGraspDiscrete-v3", render_mode="rgb_array")
 images = []
 
 
-observation, info = env.reset()
+observation = env.reset()
 images.append(env.render())
 
-for _ in range(1000):
+for i in range(100):
     action = env.action_space.sample()
     observation, reward, terminated, info = env.step(action)
     images.append(env.render())
 
     if terminated:
-        observation, info = env.reset()
+        observation = env.reset()
         images.append(env.render())
 
 env.close()
