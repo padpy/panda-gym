@@ -66,7 +66,10 @@ class ReachCurriculum(Task):
     def compute_reward(
         self, achieved_goal, desired_goal, info: Dict[str, Any]
     ) -> np.ndarray:
-        d = distance(achieved_goal[2:5], desired_goal[2:5])
+        if achieved_goal.ndim == 2:
+            d = distance(achieved_goal[:, 2:5], desired_goal[:, 2:5])
+        else:
+            d = distance(achieved_goal[2:5], desired_goal[2:5])
         if self.reward_type == "sparse":
             return -np.array(d > self.distance_threshold, dtype=np.float32)
         else:

@@ -135,6 +135,10 @@ class PickAndPlace(Task):
 
                 contact_reward = achieved_goal[1] - desired_goal[1]
                 grasp_reward = achieved_goal[0] - desired_goal[0]
+
+                if grasp_reward == 0:
+                    distance_reward = 0
+
             else:
                 obj_d = distance(achieved_goal[:, 2:5], desired_goal[:, 2:5])
                 target_d = distance(achieved_goal[:, 5:8], desired_goal[:, 5:8])
@@ -146,11 +150,13 @@ class PickAndPlace(Task):
                 contact_reward = achieved_goal[:, 1] - desired_goal[:, 1]
                 grasp_reward = achieved_goal[:, 0] - desired_goal[:, 0]
 
+                distance_reward[grasp_reward == 0] = 0
+
             return (
                 1 / 6 * distance_reward
-                + 1 / 6 * contact_reward
-                + 1 / 6 * grasp_reward
-                + 0.5 * target_reward
+                + 2 / 6 * contact_reward
+                + 2 / 6 * grasp_reward
+                + 1 / 6 * target_reward
             )
 
     def grasped(self) -> bool:
